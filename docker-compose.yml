@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: mechbazar-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mechbazar
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mechbazar-network
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: mechbazar-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - mechbazar-network
+    restart: always
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  mechbazar-network:
+    driver: bridge

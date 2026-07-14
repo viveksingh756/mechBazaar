@@ -1,0 +1,35 @@
+{
+  "name": "mechbazar-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "backend",
+    "apps/admin-panel",
+    "apps/vendor-panel",
+    "apps/customer-app",
+    "apps/delivery-app"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:admin": "npm run dev --workspace=apps/admin-panel",
+    "dev:vendor": "npm run dev --workspace=apps/vendor-panel",
+    "dev:customer": "npm run start --workspace=apps/customer-app",
+    "dev:delivery": "npm run start --workspace=apps/delivery-app",
+    "db:migrate": "npm run db:migrate --workspace=backend",
+    "db:seed": "npm run db:seed --workspace=backend",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4",
+    "react": "18.2.0",
+    "react-native": "0.74.5"
+  },
+  "overrides": {
+    "react-native": "0.74.5",
+    "react": "18.2.0",
+    "react-native-safe-area-context": "4.10.5",
+    "react-native-screens": "~3.31.1"
+  }
+}

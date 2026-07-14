@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Build outputs (Web / Vite)
+dist/
+dist-ssr/
+build/
+coverage/
+
+# Build outputs (Mobile / Expo / React Native)
+.expo/
+*.jks
+*.keystore
+*.p12
+*.prov
+*.mobileprovision
+/apps/*/ios/Pods/
+/apps/*/ios/build/
+/apps/*/android/app/build/
+/apps/*/android/.gradle/
+/apps/*/android/local.properties
+
+# Prisma / Database
+*.db
+*.db-journal
+/backend/prisma/data.db
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log

@@ -1,0 +1,465 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  CUSTOMER
+  DELIVERY
+  VENDOR
+  ADMIN
+}
+
+enum PartnerAccountStatus {
+  ACTIVE
+  INACTIVE
+  PENDING_VERIFICATION
+  SUSPENDED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PACKED
+  ASSIGNED
+  PICKED_UP
+  ON_THE_WAY
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  COD
+  UPI
+  CARD
+  NET_BANKING
+  WALLET
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PartnerStatus {
+  OFFLINE
+  ONLINE
+  BUSY
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  phone        String        @unique
+  passwordHash String
+  name         String
+  role         Role          @default(CUSTOMER)
+  dob          DateTime?
+  gender       String?
+  profilePhoto String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  
+  addresses    Address[]
+  vehicles     UserVehicle[]
+  orders       Order[]       @relation("CustomerOrders")
+  wallet       Wallet?
+  reviews      Review[]
+  wishlists    Wishlist[]
+  notifications Notification[]
+  deliveryInfo DeliveryPartner?
+}
+
+model Address {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String   // e.g. "Home", "Office", "Garage"
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  zipCode      String
+  latitude     Float
+  longitude    Float
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orders       Order[]
+}
+
+model UserVehicle {
+  id                 String            @id @default(uuid())
+  userId             String
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  registrationNumber String?
+  make               String            // Manufacturer name
+  model              String            // Model name
+  variant            String            // Variant name
+  fuelType           String
+  year               Int
+  isDefault          Boolean           @default(false)
+  manufacturerId     String?
+  manufacturer       Manufacturer?     @relation(fields: [manufacturerId], references: [id], onDelete: SetNull)
+  modelId            String?
+  vehicleModel       VehicleModel?     @relation(fields: [modelId], references: [id], onDelete: SetNull)
+  modelYearId        String?
+  modelYear          VehicleModelYear? @relation(fields: [modelYearId], references: [id], onDelete: SetNull)
+  variantId          String?
+  engineVariant      VehicleVariant?   @relation("EngineVariantRelation", fields: [variantId], references: [id], onDelete: SetNull)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+model Manufacturer {
+  id            String            @id @default(uuid())
+  name          String            @unique
+  logoUrl       String?
+  models        VehicleModel[]
+  userVehicles  UserVehicle[]
+  compatibilities ProductVehicleCompatibility[]
+}
+
+model VehicleModel {
+  id             String            @id @default(uuid())
+  manufacturerId String
+  manufacturer   Manufacturer      @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  name           String
+  modelYears     VehicleModelYear[]
+  userVehicles   UserVehicle[]
+  compatibilities ProductVehicleCompatibility[]
+
+  @@unique([manufacturerId, name])
+}
+
+model VehicleModelYear {
+  id             String            @id @default(uuid())
+  modelId        String
+  model          VehicleModel      @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  startYear      Int
+  endYear        Int
+  variants       VehicleVariant[]
+  userVehicles   UserVehicle[]
+  compatibilities ProductVehicleCompatibility[]
+
+  @@unique([modelId, startYear, endYear])
+}
+
+model VehicleVariant {
+  id              String                        @id @default(uuid())
+  modelYearId     String
+  modelYear       VehicleModelYear              @relation(fields: [modelYearId], references: [id], onDelete: Cascade)
+  name            String
+  fuelType        String                        @default("Petrol")
+  userVehicles    UserVehicle[]                 @relation("EngineVariantRelation")
+  compatibilities ProductVehicleCompatibility[]
+
+  @@unique([modelYearId, name, fuelType])
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  slug      String    @unique
+  parentId  String?
+  parent    Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryHierarchy")
+  iconUrl   String?
+  imageUrl  String?
+  isActive  Boolean   @default(true)
+  products  Product[]
+}
+
+model Brand {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  logoUrl     String?
+  isActive    Boolean   @default(true)
+  description String?
+  website     String?
+  products    Product[]
+}
+
+model Product {
+  id             String                 @id @default(uuid())
+  name           String
+  sku            String                 @unique
+  oemNumber      String?
+  description    String
+  price          Float
+  mrp            Float
+  discount       Float                  @default(0.0)
+  stock          Int                    @default(0)
+  minStockAlert  Int                    @default(5)
+  maxStock       Int                    @default(100)
+  warehouseBin   String?                @default("A-1")
+  shelfNumber    String?                @default("S-1")
+  status         String                 @default("PUBLISHED") // "DRAFT" | "PUBLISHED" | "OUT_OF_STOCK" | "DISCONTINUED"
+  brandId        String
+  brand          Brand                  @relation(fields: [brandId], references: [id])
+  categoryId     String
+  category       Category               @relation(fields: [categoryId], references: [id])
+  returnPolicy   String                 @default("7 Days Return")
+  deliveryTime   String                 @default("15 mins")
+  rating         Float                  @default(0.0)
+  reviewCount    Int                    @default(0)
+  videos         String[]
+  isFlashSale    Boolean                @default(false)
+  isFeatured     Boolean                @default(false)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  
+  images          ProductImage[]
+  specifications  ProductSpecification[]
+  oemNumbers      ProductOEMNumber[]
+  compatibilities ProductVehicleCompatibility[]
+  inventoryItems  Inventory[]
+  orderItems      OrderItem[]
+  reviews         Review[]
+  wishlists       Wishlist[]
+}
+
+model ProductImage {
+  id           String   @id @default(uuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  imageUrl     String
+  displayOrder Int      @default(0)
+  isPrimary    Boolean  @default(false)
+}
+
+model ProductSpecification {
+  id                 String   @id @default(uuid())
+  productId          String
+  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  specificationKey   String
+  specificationValue String
+}
+
+model ProductOEMNumber {
+  id           String   @id @default(uuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  oemNumber    String
+}
+
+model ProductVehicleCompatibility {
+  id              String           @id @default(uuid())
+  productId       String
+  product         Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  manufacturerId  String
+  manufacturer    Manufacturer     @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  modelId         String
+  model           VehicleModel     @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  modelYearId     String
+  modelYear       VehicleModelYear @relation(fields: [modelYearId], references: [id], onDelete: Cascade)
+  engineVariantId String
+  engineVariant   VehicleVariant   @relation(fields: [engineVariantId], references: [id], onDelete: Cascade)
+  createdAt       DateTime         @default(now())
+
+  @@unique([productId, engineVariantId])
+}
+
+model Warehouse {
+  id             String      @id @default(uuid())
+  name           String
+  address        String
+  latitude       Float
+  longitude      Float
+  inventoryItems Inventory[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model Inventory {
+  id          String    @id @default(uuid())
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouseId String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  stock       Int       @default(0)
+
+  @@unique([productId, warehouseId])
+}
+
+model Order {
+  id                String          @id @default(uuid())
+  customerId        String
+  customer          User            @relation("CustomerOrders", fields: [customerId], references: [id])
+  addressId         String
+  address           Address         @relation(fields: [addressId], references: [id])
+  deliveryPartnerId String?
+  deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id])
+  status            OrderStatus     @default(PENDING)
+  totalAmount       Float
+  deliveryCharge    Float           @default(0.0)
+  gstAmount         Float           @default(0.0)
+  discountAmount    Float           @default(0.0)
+  paymentMethod     PaymentMethod
+  paymentStatus     PaymentStatus   @default(PENDING)
+  notes             String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  items             OrderItem[]
+  payments          Payment[]
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+}
+
+model Coupon {
+  id             String    @id @default(uuid())
+  code           String    @unique
+  discountType   String    // "PERCENTAGE" or "FIXED"
+  discountValue  Float
+  maxDiscount    Float?
+  minOrderValue  Float     @default(0.0)
+  expiryDate     DateTime
+  active         Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  transactionId String   @unique
+  amount        Float
+  gateway       String   // "RAZORPAY", "WALLET", "COD"
+  status        String   // "SUCCESS", "PENDING", "FAILED"
+  createdAt     DateTime @default(now())
+}
+
+model Wallet {
+  id           String        @id @default(uuid())
+  userId       String        @unique
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance      Float         @default(0.0)
+  points       Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  walletId    String
+  wallet      Wallet          @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  amount      Float
+  type        TransactionType
+  description String
+  createdAt   DateTime        @default(now())
+}
+
+model DeliveryPartner {
+  id               String          @id @default(uuid())
+  userId           String          @unique
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicleNumber    String
+  vehicleType      String
+  vehicleBrand     String?
+  vehicleModel     String?
+  licenseNumber    String
+  dlExpiry         DateTime?
+  aadhaarNumber    String?
+  dlFrontUrl       String?
+  dlBackUrl        String?
+  aadhaarUrl       String?
+  panUrl           String?
+  rcUrl            String?
+  insuranceUrl     String?
+  accountStatus    PartnerAccountStatus @default(PENDING_VERIFICATION)
+  isDeleted        Boolean         @default(false)
+  rating           Float           @default(5.0)
+  status           PartnerStatus   @default(OFFLINE)
+  verified         Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  
+  orders        Order[]
+  location      PartnerLocation?
+}
+
+model PartnerLocation {
+  id        String          @id @default(uuid())
+  partnerId String          @unique
+  partner   DeliveryPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  latitude  Float
+  longitude Float
+  updatedAt DateTime        @updatedAt
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String
+  images    String[]
+  createdAt DateTime @default(now())
+}
+
+model Wishlist {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  details   String
+  userId    String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
+model Banner {
+  id           String   @id @default(uuid())
+  title        String
+  subtitle     String?
+  imageUrl     String
+  linkType     String   @default("none")
+  linkValue    String?
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

@@ -1,0 +1,215 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "MechBazar Automotive Quick Commerce REST API",
+    "description": "Production-ready backend API documentation for ordering and live tracking automotive spare parts.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api",
+      "description": "Local development API server"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new user (Customer, Delivery, Vendor, Admin)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "phone", "name", "password"],
+                "properties": {
+                  "email": { "type": "string", "example": "customer@mechbazar.com" },
+                  "phone": { "type": "string", "example": "+917777777777" },
+                  "name": { "type": "string", "example": "Vivek Kumar" },
+                  "password": { "type": "string", "example": "Password@123" },
+                  "role": { "type": "string", "enum": ["CUSTOMER", "DELIVERY", "VENDOR", "ADMIN"], "example": "CUSTOMER" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Successfully registered" },
+          "400": { "description": "User already exists or bad parameter" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Authenticate user and get JWT token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "example": "customer@mechbazar.com" },
+                  "password": { "type": "string", "example": "Password@123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Successfully authenticated" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/auth/profile": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get authenticated user profile details",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Profile data retrieved" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/garage/vehicles": {
+      "get": {
+        "tags": ["Garage"],
+        "summary": "Get user registered vehicles in garage",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "List of user vehicles" }
+        }
+      },
+      "post": {
+        "tags": ["Garage"],
+        "summary": "Add a vehicle to user garage",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["make", "model", "variant", "fuelType", "year"],
+                "properties": {
+                  "make": { "type": "string", "example": "Toyota" },
+                  "model": { "type": "string", "example": "Fortuner" },
+                  "variant": { "type": "string", "example": "2.8L Sigma 4" },
+                  "fuelType": { "type": "string", "example": "Diesel" },
+                  "year": { "type": "integer", "example": 2022 },
+                  "registrationNumber": { "type": "string", "example": "DL-3C-AS-7777" },
+                  "isDefault": { "type": "boolean", "example": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Vehicle added to garage" }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Search products with vehicle compatibility filtering",
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Search keyword" },
+          { "name": "category", "in": "query", "schema": { "type": "string" }, "description": "Category slug" },
+          { "name": "brand", "in": "query", "schema": { "type": "string" }, "description": "Brand name" },
+          { "name": "make", "in": "query", "schema": { "type": "string" }, "description": "Vehicle manufacturer" },
+          { "name": "model", "in": "query", "schema": { "type": "string" }, "description": "Vehicle model" },
+          { "name": "variant", "in": "query", "schema": { "type": "string" }, "description": "Vehicle variant" },
+          { "name": "fuelType", "in": "query", "schema": { "type": "string" }, "description": "Vehicle fuel type" },
+          { "name": "year", "in": "query", "schema": { "type": "integer" }, "description": "Vehicle manufacturing year" }
+        ],
+        "responses": {
+          "200": { "description": "List of matching products" }
+        }
+      }
+    },
+    "/orders": {
+      "post": {
+        "tags": ["Orders"],
+        "summary": "Place a new spare part quick commerce order",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["addressId", "items", "paymentMethod"],
+                "properties": {
+                  "addressId": { "type": "string", "example": "address-uuid" },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "productId": { "type": "string", "example": "product-uuid" },
+                        "quantity": { "type": "integer", "example": 1 }
+                      }
+                    }
+                  },
+                  "paymentMethod": { "type": "string", "enum": ["COD", "UPI", "CARD", "NET_BANKING", "WALLET"], "example": "WALLET" },
+                  "couponCode": { "type": "string", "example": "MECH10" },
+                  "notes": { "type": "string", "example": "Deliver to guards desk if unavailable" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Order created successfully" }
+        }
+      }
+    },
+    "/wallet": {
+      "get": {
+        "tags": ["Wallet"],
+        "summary": "Get wallet balance and transaction logs",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Wallet data" }
+        }
+      },
+      "post": {
+        "tags": ["Wallet"],
+        "summary": "Simulate payment gateways deposit to wallet",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["amount"],
+                "properties": {
+                  "amount": { "type": "number", "example": 2000 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Successfully deposited" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
