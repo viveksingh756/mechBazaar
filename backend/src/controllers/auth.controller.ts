@@ -118,7 +118,7 @@ export const login = async (req: AuthRequest, res: Response) => {
 
     return res.json({
       success: true,
-      message: 'Logged in successfully',
+      message: 'Logged in successfully!',
       data: {
         token,
         user: {
@@ -326,7 +326,7 @@ export const resetPassword = async (req: AuthRequest, res: Response) => {
 
     return res.json({
       success: true,
-      message: 'Password has been reset successfully. Please sign in.'
+      message: 'Password has been reset successfully. Please sign in, agains'
     });
   } catch (error: any) {
     return res.status(500).json({ success: false, message: error.message || 'Server error' });
@@ -415,7 +415,7 @@ export const updateVendorByAdmin = async (req: AuthRequest, res: Response) => {
     });
 
     if (duplicate) {
-      return res.status(400).json({ success: false, message: 'Another user with this email or phone already exists' });
+      return res.status(400).json({ success: false, message: 'A user with this email or phone already exists' });
     }
 
     // Formulate database serialized name column
