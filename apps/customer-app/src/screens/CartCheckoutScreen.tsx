@@ -11,12 +11,16 @@ const getApiUrl = () => {
     const host = address ? address.split(':')[0] : null;
     if (host) return `http://${host}:5000/api`;
   }
-  return Platform.OS === 'android' ? 'http://10.0.2.2:5000/api' : 'http://localhost:5000/api';
+  return Platform.OS === 'android' ? 'http://10.0.2.2:5000/api' : `\${API_BASE_URL}`;
 };
 
 const API_URL = getApiUrl();
 
-export default function CartCheckoutScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
+export default 
+const BASE_URL = __DEV__ ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
+const API_BASE_URL = `${BASE_URL}/api`;
+
+function CartCheckoutScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const coupon = useSelector((state: RootState) => state.cart.coupon);

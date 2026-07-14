@@ -16,8 +16,8 @@ const getHostAddress = () => {
 };
 
 const host = getHostAddress();
-const API_URL = host ? `http://${host}:5000/api` : (Platform.OS === 'android' ? 'http://10.0.2.2:5000/api' : 'http://localhost:5000/api');
-const WS_URL = host ? `http://${host}:5000` : (Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000');
+const API_URL = host ? `http://${host}:5000/api` : (Platform.OS === 'android' ? 'http://10.0.2.2:5000/api' : `\${API_BASE_URL}`);
+const WS_URL = host ? `http://${host}:5000` : (Platform.OS === 'android' ? 'http://10.0.2.2:5000' : BASE_URL);
 
 const STATUS_MAPPING: { [key: string]: number } = {
   'PENDING': 0,
@@ -39,7 +39,11 @@ const statuses = [
   { label: 'Delivered', sub: 'Handed over successfully' }
 ];
 
-export default function TrackingScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
+export default 
+const BASE_URL = __DEV__ ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
+const API_BASE_URL = `${BASE_URL}/api`;
+
+function TrackingScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
   const token = useSelector((state: RootState) => state.auth.token);
   
   const [activeOrder, setActiveOrder] = useState<any>(null);

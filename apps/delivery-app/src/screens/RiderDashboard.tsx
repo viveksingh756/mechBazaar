@@ -16,14 +16,18 @@ const getHostAddress = () => {
 };
 
 const host = getHostAddress();
-const API_URL = host ? `http://${host}:5000/api` : (Platform.OS === 'android' ? 'http://10.0.2.2:5000/api' : 'http://localhost:5000/api');
-const WS_URL = host ? `http://${host}:5000` : (Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000');
+const API_URL = host ? `http://${host}:5000/api` : (Platform.OS === 'android' ? 'http://10.0.2.2:5000/api' : `\${API_BASE_URL}`);
+const WS_URL = host ? `http://${host}:5000` : (Platform.OS === 'android' ? 'http://10.0.2.2:5000' : BASE_URL);
 
 // Delhi-Noida coordinates path progression for simulation
 const NoidaHub = { latitude: 28.6276, longitude: 77.3784 };
 const CustomerHome = { latitude: 28.6200, longitude: 77.3600 };
 
-export default function RiderDashboard() {
+export default 
+const BASE_URL = __DEV__ ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
+const API_BASE_URL = `${BASE_URL}/api`;
+
+function RiderDashboard() {
   const dispatch = useDispatch();
   const isOnline = useSelector((state: RootState) => state.rider.isOnline);
   const activeOrder = useSelector((state: RootState) => state.rider.activeOrder);

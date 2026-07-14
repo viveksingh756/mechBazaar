@@ -1,3 +1,7 @@
+
+const BASE_URL = import.meta.env.DEV ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
+const API_BASE_URL = `${BASE_URL}/api`;
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
@@ -115,7 +119,7 @@ export default function App() {
     setAuthError('');
     setIsAuthLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      const response = await axios.post(`\${API_BASE_URL}/auth/login`, { email, password });
       if (response.data && response.data.success && response.data.data) {
         const userRole = response.data.data.user?.role;
         if (userRole !== 'ADMIN') {
@@ -140,7 +144,7 @@ export default function App() {
     setAuthSuccess('');
     setIsAuthLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', {
+      const response = await axios.post(`\${API_BASE_URL}/auth/register`, {
         name,
         phone,
         email,
@@ -165,7 +169,7 @@ export default function App() {
     setAuthSuccess('');
     setIsAuthLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+      const response = await axios.post(`\${API_BASE_URL}/auth/forgot-password`, { email });
       if (response.data && response.data.success) {
         setAuthSuccess(`Reset code generated: ${response.data.code}. (SMTP is bypassed for testing)`);
         setResetCode(response.data.code); // Pre-fill reset code for easier testing
@@ -184,7 +188,7 @@ export default function App() {
     setAuthSuccess('');
     setIsAuthLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/reset-password', {
+      const response = await axios.post(`\${API_BASE_URL}/auth/reset-password`, {
         email,
         code: resetCode,
         newPassword
@@ -264,7 +268,7 @@ export default function App() {
     if (!token) return;
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      const response = await axios.get('http://localhost:5000/api/auth/admin/vendors', { headers });
+      const response = await axios.get(`\${API_BASE_URL}/auth/admin/vendors`, { headers });
       if (response.data && response.data.success) {
         setVendors(response.data.data);
       }
@@ -275,7 +279,7 @@ export default function App() {
 
   const fetchCategoriesList = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products/categories?all=true');
+      const response = await axios.get(`\${API_BASE_URL}/products/categories?all=true`);
       if (response.data && response.data.success) {
         setCategoriesList(response.data.data);
       }
@@ -286,7 +290,7 @@ export default function App() {
 
   const fetchBannersList = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products/banners?all=true');
+      const response = await axios.get(`\${API_BASE_URL}/products/banners?all=true`);
       if (response.data && response.data.success) {
         setBannersList(response.data.data);
       }
@@ -314,7 +318,7 @@ export default function App() {
     setIsRegisteringVendor(true);
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      const response = await axios.post('http://localhost:5000/api/auth/admin/register-vendor', {
+      const response = await axios.post(`\${API_BASE_URL}/auth/admin/register-vendor`, {
         name: newVendorName,
         phone: newVendorPhone,
         email: newVendorEmail,
@@ -436,7 +440,7 @@ export default function App() {
     reader.onload = async () => {
       const base64 = reader.result;
       try {
-        const res = await axios.post('http://localhost:5000/api/upload/base64', {
+        const res = await axios.post(`\${API_BASE_URL}/upload/base64`, {
           file: base64,
           filename: file.name
         }, { headers: { Authorization: `Bearer ${token}` } });
@@ -453,12 +457,12 @@ export default function App() {
     e.preventDefault();
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      const res = await axios.post('http://localhost:5000/api/admin/delivery-partners', newRiderData, { headers });
+      const res = await axios.post(`\${API_BASE_URL}/admin/delivery-partners`, newRiderData, { headers });
       if (res.data.success) {
         alert('Rider added successfully!');
         setShowAddRiderModal(false);
         // Refresh partners
-        const partnerRes = await axios.get('http://localhost:5000/api/admin/delivery-partners', { headers });
+        const partnerRes = await axios.get(`\${API_BASE_URL}/admin/delivery-partners`, { headers });
         if (partnerRes.data && partnerRes.data.success) {
           setPartners(partnerRes.data.data);
         }
@@ -475,7 +479,7 @@ export default function App() {
       const headers = { Authorization: `Bearer ${token}` };
       const res = await axios.put(`http://localhost:5000/api/admin/delivery-partners/${id}/status`, { status }, { headers });
       if (res.data.success) {
-        const partnerRes = await axios.get('http://localhost:5000/api/admin/delivery-partners', { headers });
+        const partnerRes = await axios.get(`\${API_BASE_URL}/admin/delivery-partners`, { headers });
         if (partnerRes.data && partnerRes.data.success) {
           setPartners(partnerRes.data.data);
         }
@@ -542,42 +546,42 @@ export default function App() {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       
-      const mfgRes = await axios.get('http://localhost:5000/api/garage/manufacturers', { headers });
+      const mfgRes = await axios.get(`\${API_BASE_URL}/garage/manufacturers`, { headers });
       if (mfgRes.data && mfgRes.data.success) {
         setManufacturers(mfgRes.data.data);
       }
 
-      const mdlRes = await axios.get('http://localhost:5000/api/garage/models', { headers });
+      const mdlRes = await axios.get(`\${API_BASE_URL}/garage/models`, { headers });
       if (mdlRes.data && mdlRes.data.success) {
         setModels(mdlRes.data.data);
       }
 
-      const yrRes = await axios.get('http://localhost:5000/api/garage/years', { headers });
+      const yrRes = await axios.get(`\${API_BASE_URL}/garage/years`, { headers });
       if (yrRes.data && yrRes.data.success) {
         setModelYears(yrRes.data.data);
       }
 
-      const vrtRes = await axios.get('http://localhost:5000/api/garage/variants', { headers });
+      const vrtRes = await axios.get(`\${API_BASE_URL}/garage/variants`, { headers });
       if (vrtRes.data && vrtRes.data.success) {
         setVariants(vrtRes.data.data);
       }
 
-      const brandRes = await axios.get('http://localhost:5000/api/products/brands?all=true', { headers });
+      const brandRes = await axios.get(`\${API_BASE_URL}/products/brands?all=true`, { headers });
       if (brandRes.data && brandRes.data.success) {
         setBrands(brandRes.data.data);
       }
 
-      const prodRes = await axios.get('http://localhost:5000/api/products?all=true', { headers });
+      const prodRes = await axios.get(`\${API_BASE_URL}/products?all=true`, { headers });
       if (prodRes.data && prodRes.data.success) {
         setProducts(prodRes.data.data);
       }
 
-      const orderRes = await axios.get('http://localhost:5000/api/orders/admin-all', { headers });
+      const orderRes = await axios.get(`\${API_BASE_URL}/orders/admin-all`, { headers });
       if (orderRes.data && orderRes.data.success) {
         setOrders(orderRes.data.data);
       }
 
-      const partnerRes = await axios.get('http://localhost:5000/api/admin/delivery-partners', { headers });
+      const partnerRes = await axios.get(`\${API_BASE_URL}/admin/delivery-partners`, { headers });
       if (partnerRes.data && partnerRes.data.success) {
         setPartners(partnerRes.data.data);
       }
@@ -596,7 +600,7 @@ export default function App() {
     if (!token) return;
     
     // Connect to tracking socket for real-time updates
-    const socket = io('http://localhost:5000');
+    const socket = io(BASE_URL);
     
     socket.on('connect', () => {
       console.log('Admin socket connected to tracking gateway.');
@@ -645,7 +649,7 @@ export default function App() {
     if (!newMfgInput.trim()) return;
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      const res = await axios.post('http://localhost:5000/api/garage/manufacturers', { name: newMfgInput }, { headers });
+      const res = await axios.post(`\${API_BASE_URL}/garage/manufacturers`, { name: newMfgInput }, { headers });
       if (res.data && res.data.success) {
         setNewMfgInput('');
         fetchVehicleDatabase();
@@ -692,7 +696,7 @@ export default function App() {
     if (!selectedMfgId || !newModelInput.trim()) return;
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      const res = await axios.post('http://localhost:5000/api/garage/models', { manufacturerId: selectedMfgId, name: newModelInput }, { headers });
+      const res = await axios.post(`\${API_BASE_URL}/garage/models`, { manufacturerId: selectedMfgId, name: newModelInput }, { headers });
       if (res.data && res.data.success) {
         setNewModelInput('');
         fetchVehicleDatabase();
@@ -738,7 +742,7 @@ export default function App() {
     if (!selectedModelId || !newModelYearInput.trim()) return;
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      const res = await axios.post('http://localhost:5000/api/garage/years', { modelId: selectedModelId, year: newModelYearInput }, { headers });
+      const res = await axios.post(`\${API_BASE_URL}/garage/years`, { modelId: selectedModelId, year: newModelYearInput }, { headers });
       if (res.data && res.data.success) {
         setNewModelYearInput('');
         fetchVehicleDatabase();
@@ -783,7 +787,7 @@ export default function App() {
     if (!selectedModelYearId || !newVariantInput.trim()) return;
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      const res = await axios.post('http://localhost:5000/api/garage/variants', { modelYearId: selectedModelYearId, name: newVariantInput }, { headers });
+      const res = await axios.post(`\${API_BASE_URL}/garage/variants`, { modelYearId: selectedModelYearId, name: newVariantInput }, { headers });
       if (res.data && res.data.success) {
         setNewVariantInput('');
         fetchVehicleDatabase();
@@ -825,7 +829,7 @@ export default function App() {
     if (!newBrandName.trim()) return;
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      const res = await axios.post('http://localhost:5000/api/products/brands', {
+      const res = await axios.post(`\${API_BASE_URL}/products/brands`, {
         name: newBrandName,
         logoUrl: newBrandLogo || undefined,
         description: newBrandDesc || undefined,
@@ -898,7 +902,7 @@ export default function App() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const slug = newCatName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-      const res = await axios.post('http://localhost:5000/api/products/categories', {
+      const res = await axios.post(`\${API_BASE_URL}/products/categories`, {
         name: newCatName,
         slug,
         imageUrl: newCatImageUrl || undefined,
@@ -955,7 +959,7 @@ export default function App() {
     if (!newBannerTitle.trim() || !newBannerImageUrl.trim()) return;
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      const res = await axios.post('http://localhost:5000/api/products/banners', {
+      const res = await axios.post(`\${API_BASE_URL}/products/banners`, {
         title: newBannerTitle,
         subtitle: newBannerSubtitle || undefined,
         imageUrl: newBannerImageUrl,
@@ -2209,7 +2213,7 @@ export default function App() {
                     <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                       <div style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: '#333', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         {partner.user?.profilePhoto ? (
-                           <img src={'http://localhost:5000' + partner.user.profilePhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                           <img src={BASE_URL + partner.user.profilePhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
                            <span style={{ fontSize: 20 }}>👤</span>
                         )}
@@ -2292,7 +2296,7 @@ export default function App() {
                   <h4 style={{ color: 'var(--text-secondary)', marginBottom: '10px' }}>Documents</h4>
                   <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     {['dlFrontUrl', 'dlBackUrl', 'aadhaarUrl', 'rcUrl', 'insuranceUrl'].map(doc => selectedRiderDetails[doc] ? (
-                      <a key={doc} href={'http://localhost:5000' + selectedRiderDetails[doc]} target="_blank" rel="noreferrer" style={{ display: 'block', padding: '8px', background: '#F8FAFC', borderRadius: '10px', color: 'var(--accent)', textDecoration: 'none' }}>
+                      <a key={doc} href={BASE_URL + selectedRiderDetails[doc]} target="_blank" rel="noreferrer" style={{ display: 'block', padding: '8px', background: '#F8FAFC', borderRadius: '10px', color: 'var(--accent)', textDecoration: 'none' }}>
                         View {doc.replace('Url', '')}
                       </a>
                     ) : null)}
