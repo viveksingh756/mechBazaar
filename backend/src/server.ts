@@ -71,4 +71,8 @@ process.on('SIGINT', async () => {
   });
 });
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
