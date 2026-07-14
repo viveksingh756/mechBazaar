@@ -49,7 +49,7 @@ const getApiUrl = () => {
     const host = address ? address.split(':')[0] : null;
     if (host) return `http://${host}:5000/api`;
   }
-  return Platform.OS === 'android' ? 'http://10.0.2.2:5000/api' : `\${API_BASE_URL}`;
+  return Platform.OS === 'android' ? 'http://10.0.2.2:5000/api' : `${API_BASE_URL}`;
 };
 
 const API_URL = getApiUrl();

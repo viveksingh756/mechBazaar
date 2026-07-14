@@ -16,7 +16,7 @@ const getHostAddress = () => {
 };
 
 const host = getHostAddress();
-const API_URL = host ? `http://${host}:5000/api` : (Platform.OS === 'android' ? 'http://10.0.2.2:5000/api' : `\${API_BASE_URL}`);
+const API_URL = host ? `http://${host}:5000/api` : (Platform.OS === 'android' ? 'http://10.0.2.2:5000/api' : `${API_BASE_URL}`);
 const WS_URL = host ? `http://${host}:5000` : (Platform.OS === 'android' ? 'http://10.0.2.2:5000' : BASE_URL);
 
 // Delhi-Noida coordinates path progression for simulation
