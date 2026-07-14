@@ -16,11 +16,9 @@ import {
   X
 } from 'lucide-react';
 
-const API_BASE_URL = `${API_BASE_URL}`;
-
-export default 
 const BASE_URL = import.meta.env.DEV ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
 const API_BASE_URL = `${BASE_URL}/api`;
+
 
 function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('vendor_token'));
@@ -1176,3 +1174,5 @@ function App() {
     </div>
   );
 }
+
+export default App;
