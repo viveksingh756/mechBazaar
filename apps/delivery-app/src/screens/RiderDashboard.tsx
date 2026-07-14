@@ -5,7 +5,13 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import { RootState, toggleOnline, assignOrder, rejectOrder, completeDelivery } from '../store';
 
+
+const BASE_URL = __DEV__ ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
+const API_BASE_URL = `${BASE_URL}/api`;
 const getHostAddress = () => {
+  if (!__DEV__) {
+    return null;
+  }
   const scriptURL = NativeModules.SourceCode?.scriptURL || '';
   if (scriptURL) {
     const address = scriptURL.split('://')[1];
@@ -23,11 +29,7 @@ const WS_URL = host ? `http://${host}:5000` : (Platform.OS === 'android' ? 'http
 const NoidaHub = { latitude: 28.6276, longitude: 77.3784 };
 const CustomerHome = { latitude: 28.6200, longitude: 77.3600 };
 
-export default 
-const BASE_URL = __DEV__ ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
-const API_BASE_URL = `${BASE_URL}/api`;
-
-function RiderDashboard() {
+export default function RiderDashboard() {
   const dispatch = useDispatch();
   const isOnline = useSelector((state: RootState) => state.rider.isOnline);
   const activeOrder = useSelector((state: RootState) => state.rider.activeOrder);

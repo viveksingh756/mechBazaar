@@ -5,7 +5,13 @@ import axios from 'axios';
 import { RootState, addToCart } from '../store';
 import { Product, Brand } from '../types';
 
+
+const BASE_URL = __DEV__ ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
+const API_BASE_URL = `${BASE_URL}/api`;
 const getApiUrl = () => {
+  if (!__DEV__) {
+    return API_BASE_URL;
+  }
   const scriptURL = NativeModules.SourceCode?.scriptURL || '';
   if (scriptURL) {
     const address = scriptURL.split('://')[1];
@@ -19,11 +25,7 @@ const API_URL = getApiUrl();
 
 type SortOption = 'newest' | 'price-asc' | 'price-desc' | 'discount';
 
-export default 
-const BASE_URL = __DEV__ ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
-const API_BASE_URL = `${BASE_URL}/api`;
-
-function CategoryProductsScreen({
+export default function CategoryProductsScreen({
   categoryId,
   categoryName,
   onNavigate

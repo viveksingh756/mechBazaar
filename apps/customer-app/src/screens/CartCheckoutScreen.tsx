@@ -4,7 +4,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import { RootState, updateQuantity, removeFromCart, applyCoupon, clearCart } from '../store';
 
+
+const BASE_URL = __DEV__ ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
+const API_BASE_URL = `${BASE_URL}/api`;
 const getApiUrl = () => {
+  if (!__DEV__) {
+    return API_BASE_URL;
+  }
   const scriptURL = NativeModules.SourceCode?.scriptURL || '';
   if (scriptURL) {
     const address = scriptURL.split('://')[1];
@@ -16,11 +22,7 @@ const getApiUrl = () => {
 
 const API_URL = getApiUrl();
 
-export default 
-const BASE_URL = __DEV__ ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
-const API_BASE_URL = `${BASE_URL}/api`;
-
-function CartCheckoutScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
+export default function CartCheckoutScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const coupon = useSelector((state: RootState) => state.cart.coupon);

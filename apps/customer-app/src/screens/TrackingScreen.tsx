@@ -5,7 +5,13 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import { RootState } from '../store';
 
+
+const BASE_URL = __DEV__ ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
+const API_BASE_URL = `${BASE_URL}/api`;
 const getHostAddress = () => {
+  if (!__DEV__) {
+    return null;
+  }
   const scriptURL = NativeModules.SourceCode?.scriptURL || '';
   if (scriptURL) {
     const address = scriptURL.split('://')[1];
@@ -39,11 +45,7 @@ const statuses = [
   { label: 'Delivered', sub: 'Handed over successfully' }
 ];
 
-export default 
-const BASE_URL = __DEV__ ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
-const API_BASE_URL = `${BASE_URL}/api`;
-
-function TrackingScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
+export default function TrackingScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
   const token = useSelector((state: RootState) => state.auth.token);
   
   const [activeOrder, setActiveOrder] = useState<any>(null);

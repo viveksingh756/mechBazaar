@@ -21,6 +21,9 @@ import axios from 'axios';
 import { RootState, setVehicles, setActiveVehicle, addToCart } from '../store';
 import { UserVehicle, Product, Category, Banner, HomeData } from '../types';
 
+
+const BASE_URL = __DEV__ ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
+const API_BASE_URL = `${BASE_URL}/api`;
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BANNER_HEIGHT = 180;
 const CATEGORY_EMOJI_MAP: Record<string, string> = {
@@ -43,6 +46,9 @@ const CATEGORY_EMOJI_MAP: Record<string, string> = {
 };
 
 const getApiUrl = () => {
+  if (!__DEV__) {
+    return API_BASE_URL;
+  }
   const scriptURL = NativeModules.SourceCode?.scriptURL || '';
   if (scriptURL) {
     const address = scriptURL.split('://')[1];
@@ -58,8 +64,7 @@ const API_URL = getApiUrl();
 // PRODUCT CARD COMPONENT
 // ──────────────────────────────────────────────
 
-const BASE_URL = __DEV__ ? 'http://localhost:5000' : 'https://mech-bazaar-backend.vercel.app';
-const API_BASE_URL = `${BASE_URL}/api`;
+
 
 function ProductCard({ product, onPress, onAddToCart, style }: {
   product: Product;
